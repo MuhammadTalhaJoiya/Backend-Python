@@ -27,7 +27,7 @@ def read_root():
 # Optional Query Parameter
 from typing import Union
 @app.get("/items/{item_id}")
-def itemfunc(item_id:int,q:str):
+def itemfunc(item_id:int,q:str|None=None):
     messege:dict={"Messege":item_id}
     if(q):
         messege.update({"qsas":q})
