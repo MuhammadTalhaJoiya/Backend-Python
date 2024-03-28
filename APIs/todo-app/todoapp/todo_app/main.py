@@ -58,7 +58,6 @@ from typing import Union, Optional, Annotated
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from fastapi import FastAPI, Depends
 
-
 class Todo(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     content: str = Field(index=True)
@@ -98,9 +97,9 @@ def get_session():
         yield session
 
 
-@app.get("/")
+@app.get("/") 
 def read_root():
-    return {"Hello": "World Pakistan"}
+    return {"Hello": "Pakistan"}
 
 @app.post("/todos/", response_model=Todo)
 def create_todo(todo: Todo, session: Annotated[Session, Depends(get_session)]):
@@ -116,17 +115,17 @@ def read_todos(session: Annotated[Session, Depends(get_session)]):
         return todos
 
 @app.put("/todos/{todo_id}",response_model=Todo)
-def update_request(todo_id:int,todo1:str,session:Annotated[Session,Depends(get_session)]):
-    select_todo=session.exec(select(Todo).where(Todo.id==todo_id)).first()
-    select_todo.content=todo1
+def update_request(todo_:Todo,session:Annotated[Session,Depends(get_session)]):
+    select_todo=session.exec(select(Todo).where(Todo.id==todo_.id)).one()
+    select_todo.content=todo_.content
     session.add(select_todo)
     session.commit()
     session.refresh(select_todo)
     return select_todo
 
 @app.delete("/todos/{id_number}",response_model=Todo)
-def delete_request(delete_id:int,session:Annotated[Session,Depends(get_session)]):
-    delete_todo=session.exec(select(Todo).where(Todo.id==delete_id)).first()
+def delete_request(todo_delete:Todo,session:Annotated[Session,Depends(get_session)]):
+    delete_todo=session.exec(select(Todo).where(Todo.id==todo_delete.id)).first()
     session.delete(delete_todo)
     session.commit()
     return delete_todo
