@@ -1,7 +1,7 @@
 # Use an official Python runtime as a parent image
 FROM python:3.12
 
-LABEL maintainer="talhajoiya"
+LABEL maintainer="ameen-alam"
 # Set the working directory in the container
 WORKDIR /code
 # Install system dependencies required for potential Python packages
@@ -26,4 +26,4 @@ RUN poetry install
 EXPOSE 8000
 
 # Run the app. CMD can be overridden when starting the container
-CMD ["poetry", "run", "uvicorn", "backend_code.main:app", "--host", "localhost", "--reload"]
+CMD ["poetry", "run", "uvicorn", "todo_app.main:app", "--host", "0.0.0.0", "--reload"]
