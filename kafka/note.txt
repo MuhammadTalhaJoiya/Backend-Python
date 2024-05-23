@@ -1,0 +1,15 @@
+tightly couple,synchronous
+loose couple
+kafka loose couple
+watsapp call=>tightly couple
+watsapp messeges=>loose couple
+kafka => event streaming through topic
+the service which run on server have two main thing first is main service and second is metadata
+*metadat stores the data
+*kRAFT metadata
+*streaming is segment bases and many bytes combine to form segment
+*kafka provide use coupling
+*topic and partision both are metadata 
+* younger brother is consider to be partision 
+*there are two way to communicate between microservices first is synchronise which is restapi and second is asynchronous which is acheived by apachi kafka
+*kafka is event streaming distribution platform
