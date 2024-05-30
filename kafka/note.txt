@@ -13,3 +13,10 @@ the service which run on server have two main thing first is main service and se
 * younger brother is consider to be partision 
 *there are two way to communicate between microservices first is synchronise which is restapi and second is asynchronous which is acheived by apachi kafka
 *kafka is event streaming distribution platform
+*kafka is a broker and it is server if two broker is in project then there is two server running on it
+*In kafka there might be have multiple topics and multiple topics might be contain "replica partision" or "leader partision" in itself
+*in asynchronous architecture there are 4 ways to communicate with the client from server
+1:by giving order id to client and giving the email to client for furthur info
+2:web socket,it takes data from server to client on every event firing
+3:server side event which listen on client
+4:polling,client request continiously for the result
