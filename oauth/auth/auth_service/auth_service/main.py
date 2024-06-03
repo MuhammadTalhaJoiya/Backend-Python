@@ -1,46 +1,37 @@
-from fastapi import FastAPI,Depends,HTTPException
-
-from jose import jwt, JWSError
-from datetime import datetime, timedelta
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import FastAPI, Depends, HTTPException
 from typing import Annotated
-ALGORITHM = "HS256"
-SECRET_KEY = "A Secure Secret Key"
+from jose import JWTError
+from datetime import timedelta
+from auth_service.utils import create_access_token, decode_access_token
 
-def create_access_token(subject: str , expires_delta: timedelta) -> str:
-    expire = datetime.utcnow() + expires_delta
-    to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
-def decode_access_token(token:str):
-    decode_data=jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
-    return decode_data
-app= FastAPI()
-@app.get("/encodedata")
-def get_access_token(user_name: str):
-    access_token_expire= timedelta(minutes=1)
-    access_token_generated= create_access_token(subject=user_name,expires_delta=access_token_expire)
-    return {"token_username":access_token_generated}
-
-@app.get("/decodedata")
-def decodedstring(encodedstring:str):
-    data_decode=decode_access_token(encodedstring)
-    return data_decode
-
-fake_users_db={
-    "Talha":{
-        "username":"talha",
-        "password":"12345",
+fake_users_db: dict[str, dict[str, str]] = {
+    "ameenalam": {
+        "username": "ameenalam",
+        "full_name": "Ameen Alam",
+        "email": "ameenalam@example.com",
+        "password": "ameenalamsecret",
     },
-    "Ali":{
-        "username":"talha",
-        "password":"12345"
-    }
+    "mjunaid": {
+        "username": "mjunaid",
+        "full_name": "Muhammad Junaid",
+        "email": "mjunaid@example.com",
+        "password": "mjunaidsecret",
+    },
 }
 
+
+app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 @app.post("/login")
-def getuserdata(form_data:Annotated[OAuth2PasswordRequestForm,Depends(OAuth2PasswordRequestForm)]):
+def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends(OAuth2PasswordRequestForm)]):
+    """
+    Understanding the login system
+    -> Takes form_data that have username and password
+    """
     user_in_fake_db = fake_users_db.get(form_data.username)
     if not user_in_fake_db:
         raise HTTPException(status_code=400, detail="Incorrect username")
@@ -52,4 +43,45 @@ def getuserdata(form_data:Annotated[OAuth2PasswordRequestForm,Depends(OAuth2Pass
 
     access_token = create_access_token(
         subject=user_in_fake_db["username"], expires_delta=access_token_expires)
-    return access_token
+
+    return {"access_token": access_token, "token_type": "bearer", "expires_in": access_token_expires.total_seconds() }
+
+
+@app.get("/get-access-token")
+def get_access_token(user_name: str):
+    """
+    Understanding the access token
+    -> Takes user_name as input and returns access token
+    -> timedelta(minutes=1) is used to set the expiry time of the access token to 1 minute
+    """
+
+    access_token_expires = timedelta(minutes=1)
+    access_token = create_access_token(
+        subject=user_name, expires_delta=access_token_expires)
+
+    return {"access_token": access_token}
+
+
+@app.get("/decode_token")
+def decoding_token(access_token: str):
+    """
+    Understanding the access token decoding and validation
+    """
+    try:
+        decoded_token_data = decode_access_token(access_token)
+        return {"decoded_token": decoded_token_data}
+    except JWTError as e:
+        return {"error": str(e)}
+
+@app.get("/users/all")
+def get_all_users():
+    # Note: We never return passwords in a real application
+    return fake_users_db
+
+@app.get("/users/me")
+def read_users_me(token: Annotated[str, Depends(oauth2_scheme)]):
+    user_token_data = decode_access_token(token)
+    
+    user_in_db = fake_users_db.get(user_token_data["sub"])
+    
+    return user_in_db
